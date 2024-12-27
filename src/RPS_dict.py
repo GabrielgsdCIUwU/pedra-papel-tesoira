@@ -59,8 +59,30 @@ def assess_game(user_action, computer_action):
     return game_result
 
 
+last_game_result = -1
+computer_what_action_choose = 0
+
 def get_computer_action():
-    computer_selection = random.randint(0, len(GameAction) - 1)
+    
+    len_action = len(GameAction)
+    global computer_what_action_choose
+    options = [option for option in range(len_action)]
+
+    victory = GameResult.Victory
+    defeat = GameResult.Defeat
+    if last_game_result == victory:
+        computer_what_action_choose -= 1
+    elif last_game_result == defeat:
+        computer_what_action_choose += 1
+    else:
+        computer_what_action_choose = random.choice(options)
+
+    try:
+        computer_selection = options[computer_what_action_choose % len_action]
+    except IndexError:
+        print("Fuera de rango!")
+        computer_selection = GameAction(random.choice(options))
+
     computer_action = GameAction(computer_selection)
     print(f"Computer picked {computer_action.name}.")
 
@@ -93,7 +115,8 @@ def main():
             continue
 
         computer_action = get_computer_action()
-        assess_game(user_action, computer_action)
+        global last_game_result
+        last_game_result = assess_game(user_action, computer_action)
 
         if not play_another_round():
             break

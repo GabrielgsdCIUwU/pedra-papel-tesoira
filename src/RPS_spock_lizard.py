@@ -12,6 +12,9 @@ class GameAction(IntEnum):
 
     def get_game_choices():
         return [f"{game_action.name}[{game_action.value}]" for game_action in GameAction]
+    
+    def exclude_game_action(*actions_to_exclude):
+        return [action for action in GameAction if action not in actions_to_exclude]
 
 
 class GameResult(IntEnum):
@@ -21,9 +24,11 @@ class GameResult(IntEnum):
 
 
 Victories = {
-    GameAction.ROCK: GameAction.PAPER,
-    GameAction.PAPER: GameAction.SCISSORS,
-    GameAction.SCISSORS: GameAction.ROCK
+    GameAction.ROCK: GameAction.exclude_game_action(GameAction.SCISSORS, GameAction.LIZARD),
+    GameAction.PAPER: GameAction.exclude_game_action(GameAction.SPOCK, GameAction.ROCK),
+    GameAction.SCISSORS: GameAction.exclude_game_action(GameAction.PAPER, GameAction.LIZARD),
+    GameAction.LIZARD: GameAction.exclude_game_action(GameAction.SPOCK, GameAction.PAPER),
+    GameAction.SPOCK: GameAction.exclude_game_action(GameAction.SCISSORS, GameAction.ROCK)
 }
 class Game():
 
@@ -35,7 +40,7 @@ class Game():
 
         if user_action == computer_action:
             return GameResult.TIE
-        elif computer_action == Victories[user_action]:
+        elif computer_action in Victories[user_action]:
             return GameResult.DEFEAT
         else:
             return GameResult.VICTORY

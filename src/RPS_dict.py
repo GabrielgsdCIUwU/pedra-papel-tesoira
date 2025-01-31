@@ -4,123 +4,88 @@ from enum import IntEnum
 
 class GameAction(IntEnum):
 
-    Rock = 0
-    Paper = 1
-    Scissors = 2
+    ROCK = 0
+    PAPER = 1
+    SCISSORS = 2
 
 
 class GameResult(IntEnum):
-    Victory = 0
-    Defeat = 1
-    Tie = 2
+    VICTORY = 0
+    DEFEAT = 1
+    TIE = 2
 
 
 Victories = {
-    GameAction.Rock: GameAction.Paper,
-    GameAction.Paper: GameAction.Scissors,
-    GameAction.Scissors: GameAction.Rock
+    GameAction.ROCK: GameAction.PAPER,
+    GameAction.PAPER: GameAction.SCISSORS,
+    GameAction.SCISSORS: GameAction.ROCK
 }
+class Game():
 
-def assess_game(user_action, computer_action):
+    def __init__(self):
+        self.last_game_result = -1
+        self.computer_what_action_choose = 0
 
-    game_result = None
+    def assess_game(self, user_action, computer_action):
 
-    if user_action == computer_action:
-        print(f"User and computer picked {user_action.name}. Draw game!")
-        game_result = GameResult.Tie
-
-    # You picked Rock
-    elif user_action == GameAction.Rock:
-        if computer_action == GameAction.Scissors:
-            print("Rock smashes scissors. You won!")
-            game_result = GameResult.Victory
+        if user_action == computer_action:
+            return GameResult.TIE
+        elif computer_action == Victories[user_action]:
+            return GameResult.DEFEAT
         else:
-            print("Paper covers rock. You lost!")
-            game_result = GameResult.Defeat
+            return GameResult.VICTORY
 
-    # You picked Paper
-    elif user_action == GameAction.Paper:
-        if computer_action == GameAction.Rock:
-            print("Paper covers rock. You won!")
-            game_result = GameResult.Victory
+
+
+    def get_computer_action(self):
+
+        len_action = len(GameAction)
+        options = [option for option in range(len_action)]
+
+        victory = GameResult.VICTORY
+        defeat = GameResult.DEFEAT
+        if self.last_game_result == victory:
+            self.computer_what_action_choose -= 1
+        elif self.last_game_result == defeat:
+            self.computer_what_action_choose += 1
         else:
-            print("Scissors cuts paper. You lost!")
-            game_result = GameResult.Defeat
+            self.computer_what_action_choose = random.choice(options)
 
-    # You picked Scissors
-    elif user_action == GameAction.Scissors:
-        if computer_action == GameAction.Rock:
-            print("Rock smashes scissors. You lost!")
-            game_result = GameResult.Defeat
-        else:
-            print("Scissors cuts paper. You won!")
-            game_result = GameResult.Victory
-
-    return game_result
-
-
-last_game_result = -1
-computer_what_action_choose = 0
-
-def get_computer_action():
-    
-    len_action = len(GameAction)
-    global computer_what_action_choose
-    options = [option for option in range(len_action)]
-
-    victory = GameResult.Victory
-    defeat = GameResult.Defeat
-    if last_game_result == victory:
-        computer_what_action_choose -= 1
-    elif last_game_result == defeat:
-        computer_what_action_choose += 1
-    else:
-        computer_what_action_choose = random.choice(options)
-
-    try:
-        computer_selection = options[computer_what_action_choose % len_action]
-    except IndexError:
-        print("Fuera de rango!")
-        computer_selection = GameAction(random.choice(options))
-
-    computer_action = GameAction(computer_selection)
-    print(f"Computer picked {computer_action.name}.")
-
-    return computer_action
-
-
-def get_user_action():
-    # Scalable to more options (beyond rock, paper and scissors...)
-    game_choices = [f"{game_action.name}[{game_action.value}]" for game_action in GameAction]
-    game_choices_str = ", ".join(game_choices)
-    user_selection = int(input(f"\nPick a choice ({game_choices_str}): "))
-    user_action = GameAction(user_selection)
-
-    return user_action
-
-
-def play_another_round():
-    another_round = input("\nAnother round? (y/n): ")
-    return another_round.lower() == 'y'
-
-
-def main():
-
-    while True:
         try:
-            user_action = get_user_action()
-        except ValueError:
-            range_str = f"[0, {len(GameAction) - 1}]"
-            print(f"Invalid selection. Pick a choice in range {range_str}!")
-            continue
+            computer_selection = options[self.computer_what_action_choose % len_action]
+        except IndexError:
+            computer_selection = GameAction(random.choice(options))
 
-        computer_action = get_computer_action()
-        global last_game_result
-        last_game_result = assess_game(user_action, computer_action)
+        computer_action = GameAction(computer_selection)
 
-        if not play_another_round():
-            break
+        return computer_action
+
+
+    def get_user_action(self):
+        game_choices = [f"{game_action.name}[{game_action.value}]" for game_action in GameAction]
+        game_choices_str = ", ".join(game_choices)
+        user_selection = int(input(f"\nPick a choice ({game_choices_str}): "))
+        user_action = GameAction(user_selection)
+
+        return user_action
+
+
+    def is_user_want_play(self):
+        another_round = input("\nAnother round? (y/n): ")
+        return another_round.lower() == 'y'
+
+
+    def play(self):
+
+        while True:
+            user_action = self.get_user_action()
+
+            computer_action = self.get_computer_action()
+            self.last_game_result = self.assess_game(user_action, computer_action)
+
+            if not self.is_user_want_play():
+                break
 
 
 if __name__ == "__main__":
-    main()
+    Game().play()

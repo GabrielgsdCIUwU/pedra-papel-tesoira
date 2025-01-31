@@ -8,6 +8,9 @@ class GameAction(IntEnum):
     PAPER = 1
     SCISSORS = 2
 
+    def get_game_choices():
+        return [f"{game_action.name}[{game_action.value}]" for game_action in GameAction]
+
 
 class GameResult(IntEnum):
     VICTORY = 0
@@ -61,31 +64,73 @@ class Game():
         return computer_action
 
 
-    def get_user_action(self):
-        game_choices = [f"{game_action.name}[{game_action.value}]" for game_action in GameAction]
-        game_choices_str = ", ".join(game_choices)
-        user_selection = int(input(f"\nPick a choice ({game_choices_str}): "))
-        user_action = GameAction(user_selection)
-
-        return user_action
+    def get_user_action(self, user_option_selected):
+        
+        if user_option_selected in [option.value for option in GameAction]:
+            return GameAction(user_option_selected)
+        else: 
+            return None
 
 
     def is_user_want_play(self):
-        another_round = input("\nAnother round? (y/n): ")
-        return another_round.lower() == 'y'
+        user_input = input("Quieres seguir jugando? (y/n): ")
+        if self.is_input_valid("yon", user_input):
+            return user_input.lower() in ['y', 's']
+        else:
+            print("Invalid input. Valid options: y/n.")
+            return self.is_user_want_play()
+
+            
+    
+    def is_input_valid(self, type_choice, input_user):
+        input_user = input_user.lower()
+        if type_choice == "yon":
+            if input_user not in ['y', 'n', 's']:
+                return False
+            else:
+                return True
+            
+        elif type_choice == "number":
+            try:
+                int(input_user)
+                return True
+            except ValueError:
+                return False
+    
+    def manage_get_user_action(self):
+        user_input = input()
+        if self.is_input_valid("number", user_input):
+                
+            return self.get_user_action(int(user_input))
+        else:
+            print("Invalid input. Need to be a number.")
+            return self.manage_get_user_action()
+                
 
 
     def play(self):
 
         while True:
-            user_action = self.get_user_action()
+            print(f"\n Pick a choice ${", ".join(GameAction.get_game_choices())}")
 
-            computer_action = self.get_computer_action()
-            self.last_game_result = self.assess_game(user_action, computer_action)
+
+            user_action = self.manage_get_user_action()
+            if user_action in GameAction:
+                computer_action = self.get_computer_action()
+                self.last_game_result = self.assess_game(user_action, computer_action)
+                print(f"Tu elección: {user_action.name}")
+                print(f"La elección de la computadora: {computer_action.name}")
+                print(f"Resultado: {GameResult(self.last_game_result).name}")
+            else:
+                print(f"Invalid input. You have to choose {", ".join(GameAction.get_game_choices())} .")
+                continue
 
             if not self.is_user_want_play():
                 break
-
+               
+            else:
+                print("Invalid input. Need to be a number.")
+                continue
 
 if __name__ == "__main__":
     Game().play()

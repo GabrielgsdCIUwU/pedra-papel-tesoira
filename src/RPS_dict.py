@@ -1,6 +1,6 @@
 import random
 from enum import IntEnum
-
+import survey
 
 class GameAction(IntEnum):
 
@@ -63,74 +63,30 @@ class Game():
 
         return computer_action
 
-
-    def get_user_action(self, user_option_selected):
-        
-        if user_option_selected in [option.value for option in GameAction]:
-            return GameAction(user_option_selected)
-        else: 
-            return None
-
-
-    def is_user_want_play(self):
-        user_input = input("Quieres seguir jugando? (y/n): ")
-        if self.is_input_valid("yon", user_input):
-            return user_input.lower() in ['y', 's']
-        else:
-            print("Invalid input. Valid options: y/n.")
-            return self.is_user_want_play()
-
-            
-    
-    def is_input_valid(self, type_choice, input_user):
-        input_user = input_user.lower()
-        if type_choice == "yon":
-            if input_user not in ['y', 'n', 's']:
-                return False
-            else:
-                return True
-            
-        elif type_choice == "number":
-            try:
-                int(input_user)
-                return True
-            except ValueError:
-                return False
-    
-    def manage_get_user_action(self):
-        user_input = input()
-        if self.is_input_valid("number", user_input):
-                
-            return self.get_user_action(int(user_input))
-        else:
-            print("Invalid input. Need to be a number.")
-            return self.manage_get_user_action()
-                
-
+    def get_color_game_result(self, game_result):
+        if game_result == GameResult.VICTORY:
+            return survey.colors.basic('green')
+        elif game_result == GameResult.DEFEAT:
+            return survey.colors.basic('red')
+        elif game_result == GameResult.TIE:
+            return survey.colors.basic('yellow')
 
     def play(self):
 
         while True:
-            print(f"\n Pick a choice ${", ".join(GameAction.get_game_choices())}")
 
-
-            user_action = self.manage_get_user_action()
-            if user_action in GameAction:
-                computer_action = self.get_computer_action()
-                self.last_game_result = self.assess_game(user_action, computer_action)
-                print(f"Tu elección: {user_action.name}")
-                print(f"La elección de la computadora: {computer_action.name}")
-                print(f"Resultado: {GameResult(self.last_game_result).name}")
-            else:
-                print(f"Invalid input. You have to choose {", ".join(GameAction.get_game_choices())} .")
-                continue
-
-            if not self.is_user_want_play():
+            user_action = survey.routines.select('Selecciona con que quieres jugar: ', options=GameAction.get_game_choices())
+           
+            computer_action = self.get_computer_action()
+            self.last_game_result = self.assess_game(user_action, computer_action)
+            
+            print(f"Tu elección: {GameAction(user_action).name}")
+            print(f"La elección de la computadora: {computer_action.name}")
+            survey.printers.text(f'Resultado: {self.get_color_game_result(self.last_game_result)} {self.last_game_result.name} {survey.colors.style('reset')}')
+        
+            user_want_to_play = survey.routines.inquire('Quieres seguir jugando? ')
+            if not user_want_to_play:
                 break
-               
-            else:
-                print("Invalid input. Need to be a number.")
-                continue
 
 if __name__ == "__main__":
     Game().play()

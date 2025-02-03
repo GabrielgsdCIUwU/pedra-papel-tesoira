@@ -18,22 +18,22 @@ class GameResult(IntEnum):
     TIE = 2
 
 
-Victories = {
-    GameAction.ROCK: GameAction.PAPER,
-    GameAction.PAPER: GameAction.SCISSORS,
-    GameAction.SCISSORS: GameAction.ROCK
-}
 class Game():
 
     def __init__(self):
         self.last_game_result = -1
         self.computer_what_action_choose = 0
+        self.victory = {
+            GameAction.ROCK: GameAction.PAPER,
+            GameAction.PAPER: GameAction.SCISSORS,
+            GameAction.SCISSORS: GameAction.ROCK
+        }
 
     def assess_game(self, user_action, computer_action):
 
         if user_action == computer_action:
             return GameResult.TIE
-        elif computer_action == Victories[user_action]:
+        elif computer_action == self.victory[user_action]:
             return GameResult.DEFEAT
         else:
             return GameResult.VICTORY
